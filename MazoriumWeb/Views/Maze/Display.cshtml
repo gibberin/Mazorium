@@ -1,0 +1,69 @@
+﻿@model MazoriumWeb.Models.Maze
+
+@{
+    ViewData["Title"] = "Maze";
+}
+
+<h1>A maze</h1>
+
+<div style="font-family:'Lucida Console', monospace;">
+    @* Print intro text *@
+    <br />
+    Start Here!<br />
+    &nbsp;V
+    @* Render maze *@
+    @* Start with top line *@
+    @for (int i = 2; i <= Model.Width; i++)
+    {
+        <text>_&nbsp;</text>
+    }
+    <br />
+
+    @* Print bottom and right borders of each cell *@
+    @for (int row = 1; row <= Model.Height; row++)
+    {
+        for (int col = 1; col <= Model.Width; col++)
+        {
+            // Print left side of maze
+            if (1 == col)
+            {
+                <text>|</text>
+            }
+
+            // Bottom
+            if (row == Model.Height || (!Model.GetAt(col, row + 1).IsConnectedTo(Model.GetAt(col, row))))
+            {
+                if (Model.GetAt(col, row) != Model.End)
+                {
+                    <text>_</text>
+                }
+                else // Print end cell with no bottom as an exit
+                {
+                    <text>&nbsp;</text>
+                }
+            }
+            else
+            {
+                <text>&nbsp;</text>
+            }
+
+            // Right
+            if (col == Model.Width || (!Model.GetAt(col + 1, row).IsConnectedTo(Model.GetAt(col, row))))
+            {
+                <text>|</text>;
+            }
+            else
+            {
+                <text>&nbsp;</text>
+            }
+        }
+        <br />
+    }
+    <br />
+
+    @* TODO: Enable navigation of the maze! *@
+
+</div>
+<div>
+    <a asp-controller="Maze" asp-action="Display">New Maze</a>
+</div>
