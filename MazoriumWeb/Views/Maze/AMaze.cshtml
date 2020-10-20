@@ -5,6 +5,15 @@
 }
 
 <h1>A maze</h1>
+<form asp-controller="Maze" asp-action="AMaze">
+    <p>
+        <div style="margin-bottom:15px;">
+            Width: <input asp-for="Width" style="margin-right:20px;" />
+            Height: <input asp-for="Height" />
+        </div>
+        <button type="submit">New maze</button>
+    </p>
+</form>
 
 <div style="font-family:'Lucida Console', monospace;">
     @* Print intro text *@
@@ -64,6 +73,6 @@
     @* TODO: Enable navigation of the maze! *@
 
 </div>
-<div>
-    <a asp-controller="Maze" asp-action="Display">New Maze</a>
-</div>
+@*<div>
+    <a asp-controller="Maze" asp-action="AMaze">New Maze</a>
+</div>*@

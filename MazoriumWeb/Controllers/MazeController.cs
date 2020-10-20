@@ -18,9 +18,9 @@ namespace MazoriumWeb.Controllers
         }
 
         // GET: MazeController
-        public ActionResult Display()
+        public ActionResult AMaze(int width = 10, int height = 10)
         {
-            Maze maze = new Maze(10, 10);
+            Maze maze = new Maze(width, height);
             maze.GenerateMaze();
             return View(maze);
         }

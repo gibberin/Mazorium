@@ -8,8 +8,8 @@ namespace MazoriumWeb.Models
 {
     public class Maze
     {
-        int _height = 100;
-        int _width = 100;
+        int _height = 10;
+        int _width = 10;
 
         public int Height { get { return _height; } set { _height = value; GenerateMaze(); } }
         public int Width { get { return _width; } set { _width = value;  GenerateMaze(); } }
@@ -33,7 +33,7 @@ namespace MazoriumWeb.Models
             return GenerateMaze(Start, End, Height, Width);
         }
 
-        public int GenerateMaze(Cell start, Cell end, int height = 100, int width = 100)
+        public int GenerateMaze(Cell start, Cell end, int height = 10, int width = 10)
         {
             _height = height;
             _width = width;
@@ -45,11 +45,11 @@ namespace MazoriumWeb.Models
             List<Cell> unconnectedCells = new List<Cell>();
 
             // Populate maze matrix
-            for(int row = 1; row <= _width; row++)
+            for(int row = 1; row <= Height; row++)
             {
                 matrix.Add(new List<Cell>());
 
-                for(int col = 1; col <= _height; col++)
+                for(int col = 1; col <= Width; col++)
                 {
                     Cell newCell = new Cell(col, row);
                     if (1 < col)
@@ -72,10 +72,14 @@ namespace MazoriumWeb.Models
 
             // Create paths
             Random rand = new Random((int)DateTime.Now.Ticks);
+            List<Cell> currPath = new List<Cell>();
+            List<Cell> validNextCells = new List<Cell>();
 
             //  Select random unconnected cell
             while (0 < unconnectedCells.Count)
             {
+                currPath.Clear();
+
                 Cell cell = unconnectedCells[rand.Next(unconnectedCells.Count)];
                 Console.WriteLine("Starting new path at (" + cell.X + ", " + cell.Y + ")");
 
@@ -83,21 +87,32 @@ namespace MazoriumWeb.Models
                 bool extend = true;
                 while(extend)
                 {
+                    validNextCells.Clear();
+                    foreach(Cell uConnNeighbor in cell.UnconnectedNeighbors())
+                    {
+                        if(!currPath.Contains(uConnNeighbor))
+                        {
+                            validNextCells.Add(uConnNeighbor);
+                        }
+                    }
+
                     // Pick a random neighbor
-                    int unconnectedCount = cell.UnconnectedNeighbors().Count;
-                    if(0 == unconnectedCount)
+                    int numNextCells = validNextCells.Count;
+                    if(0 == numNextCells)
                     {
                         extend = false;
                         unconnectedCells.Remove(cell);
                         continue;
                     }
-                    int randIdx = rand.Next(unconnectedCount);
-                    Debug.Assert(randIdx < unconnectedCount);
-                    Cell nextCell = cell.UnconnectedNeighbors()[randIdx];
+                    int randIdx = rand.Next(numNextCells);
+                    Debug.Assert(randIdx < numNextCells);
+
+                    Cell nextCell = validNextCells[randIdx];
                     extend = nextCell.IsUnconnected() && nextCell != Start && nextCell != End;
                     cell.ConnectTo(nextCell);
                     unconnectedCells.Remove(cell);
                     cell = nextCell;
+                    currPath.Add(cell);
                     Console.WriteLine("Connecting to (" + cell.X + ", " + cell.Y + ")");
                 }
 
