@@ -24,32 +24,70 @@ namespace MazoriumWeb.Models
             _width = x;
             _height = y;
 
+            matrix = new List<List<Cell>>();
+
             Start = new Cell(1, 1);
             End = new Cell(Width, Height);
         }
 
+        /// <summary>
+        /// Generate maze with existing parameters
+        /// </summary>
+        /// <returns></returns>
         public int GenerateMaze()
         {
             return GenerateMaze(Start, End, Height, Width);
         }
 
+        /// <summary>
+        /// Generate maze with specific parameters
+        /// </summary>
+        /// <param name="start">A cell object containing the location of the start of the maze in the matrix</param>
+        /// <param name="end">A cell object containing the location of the end of the maze in the matrix</param>
+        /// <param name="height">The number of rows in the maze</param>
+        /// <param name="width">The number of columns in the maze</param>
+        /// <returns>The total number of cells in the maze</returns>
         public int GenerateMaze(Cell start, Cell end, int height = 10, int width = 10)
         {
             _height = height;
             _width = width;
-            Start = start;
-            End = end;
 
-            matrix = new List<List<Cell>>();
+            matrix.Clear();
 
             List<Cell> unconnectedCells = new List<Cell>();
 
-            // Populate maze matrix
-            for(int row = 1; row <= Height; row++)
+            // Populate maze matrix with unconnected cells
+            PopulateMatrix(ref unconnectedCells, height, width);
+
+            Start = GetAt(start.X, start.Y);
+            End = GetAt(end.X, end.Y);
+
+            // Create paths
+            int numPaths = GeneratePaths(ref unconnectedCells);
+            Debug.Assert(0 < numPaths);
+            Debug.WriteLine("Generated " + numPaths + " paths with an average length of " + (height * width) / numPaths + " cells.");
+
+            return _height * _width;
+        }
+
+        /// <summary>
+        /// Fills the maze matrix with unconnected cells
+        /// </summary>
+        /// <param name="unconnectedCells">A list to hold all the new unconnected cells added to the maze</param>
+        /// <param name="height">The number of rows in the maze</param>
+        /// <param name="width">The number of columns in the maze</param>
+        /// <returns>The total number of cells added</returns>
+        int PopulateMatrix(ref List<Cell> unconnectedCells, int height, int width)
+        {
+            Debug.Assert(null != unconnectedCells);
+            Debug.Assert(0 < height);
+            Debug.Assert(0 < width);
+
+            for (int row = 1; row <= Height; row++)
             {
                 matrix.Add(new List<Cell>());
 
-                for(int col = 1; col <= Width; col++)
+                for (int col = 1; col <= Width; col++)
                 {
                     Cell newCell = new Cell(col, row);
                     if (1 < col)
@@ -67,10 +105,25 @@ namespace MazoriumWeb.Models
                 }
             }
 
-            Start = GetAt(Start.X, Start.Y);
-            End = GetAt(End.X, End.Y);
+            return width * height;
+        }
+
+        /// <summary>
+        /// Generates paths within the maze matrix
+        /// </summary>
+        /// <param name="unconnectedCells">A list of all the unconnected cells in the matrix</param>
+        /// <returns>The number of paths generated</returns>
+        int GeneratePaths(ref List<Cell> unconnectedCells)
+        {
+            Debug.Assert(null != unconnectedCells);
+            if (0 == unconnectedCells.Count())
+            {
+                Debug.WriteLine("No unconnected cells provided to generate new paths.");
+                return 0;
+            }
 
             // Create paths
+            int pathCount = 0;
             Random rand = new Random((int)DateTime.Now.Ticks);
             List<Cell> currPath = new List<Cell>();
             List<Cell> validNextCells = new List<Cell>();
@@ -79,51 +132,63 @@ namespace MazoriumWeb.Models
             while (0 < unconnectedCells.Count)
             {
                 currPath.Clear();
+                pathCount++;
 
                 Cell cell = unconnectedCells[rand.Next(unconnectedCells.Count)];
-                Console.WriteLine("Starting new path at (" + cell.X + ", " + cell.Y + ")");
 
                 // Extend path in a random direction until a connected cell is encountered
                 bool extend = true;
-                while(extend)
+                while (extend)
                 {
-                    validNextCells.Clear();
-                    foreach(Cell uConnNeighbor in cell.UnconnectedNeighbors())
-                    {
-                        if(!currPath.Contains(uConnNeighbor))
-                        {
-                            validNextCells.Add(uConnNeighbor);
-                        }
-                    }
+                    validNextCells = GetValidNextCells(ref currPath, cell);
 
                     // Pick a random neighbor
                     int numNextCells = validNextCells.Count;
-                    if(0 == numNextCells)
+                    if (0 == numNextCells)
                     {
-                        extend = false;
                         unconnectedCells.Remove(cell);
-                        continue;
-                    }
-                    int randIdx = rand.Next(numNextCells);
-                    Debug.Assert(randIdx < numNextCells);
 
-                    Cell nextCell = validNextCells[randIdx];
-                    extend = nextCell.IsUnconnected() && nextCell != Start && nextCell != End;
+                        // Resolve cyclical paths by picking a random cell in the current path and extending the path in a different direction
+                        while (0 == validNextCells.Count())
+                        {
+                            cell = currPath[rand.Next(currPath.Count())];
+                            validNextCells = GetValidNextCells(ref currPath, cell);
+                        }
+
+                        numNextCells = validNextCells.Count();
+                    }
+
+                    Cell nextCell = validNextCells[rand.Next(numNextCells)];
+                    extend = nextCell.IsUnconnected();
                     cell.ConnectTo(nextCell);
                     unconnectedCells.Remove(cell);
                     cell = nextCell;
                     currPath.Add(cell);
-                    Console.WriteLine("Connecting to (" + cell.X + ", " + cell.Y + ")");
                 }
-
-                Console.WriteLine("Halted at (" + cell.X + ", " + cell.Y + ") with " + cell.NumConnections() + " connections");
             }
 
-            Console.WriteLine("All cells connected.");
+            return pathCount;
+        }
 
-            // TODO: Print maze
+        /// <summary>
+        /// Gets a list of neighboring cells to which a connection can be made (i.e. are not already in the current path)
+        /// </summary>
+        /// <param name="currPath">The list of cells in the current path</param>
+        /// <param name="cell">The cell to start from</param>
+        /// <returns>A list of cells to which a connection would be valid</returns>
+        List<Cell> GetValidNextCells(ref List<Cell> currPath, Cell cell)
+        {
+            List<Cell> validCells = new List<Cell>();
 
-            return _height * _width;
+            foreach (Cell uConnNeighbor in cell.UnconnectedNeighbors())
+            {
+                if (!currPath.Contains(uConnNeighbor))
+                {
+                    validCells.Add(uConnNeighbor);
+                }
+            }
+
+            return validCells;
         }
 
         /// <summary>
@@ -134,13 +199,18 @@ namespace MazoriumWeb.Models
         /// <returns></returns>
         public Cell GetAt(int col, int row)
         {
-            if(null == matrix)
+            if(null == matrix || 0 == matrix.Count())
             {
+                Debug.WriteLine("Attempt to retrieve cells from non-existant matrix");
                 return null;
             }
 
-            Debug.Assert(0 < col && col <= Width);
-            Debug.Assert(0 < row && row <= Height);
+            // Test requested cell exists
+            if((1 > row || row > matrix.Count()) || (1 > col || col > matrix[0].Count()))
+            {
+                Debug.WriteLine("Requested cell (" + col + ", " + row + ") is outside matrix boundaries " + matrix[0].Count() + "x" + matrix.Count());
+                return null;
+            }
 
             return matrix[row - 1][col - 1];
         }

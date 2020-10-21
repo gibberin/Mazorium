@@ -15,7 +15,7 @@ namespace MazoriumWeb.Models
         public List<Cell> Neighbors { get; }
         public List<Cell> Connections { get; }
 
-        public Cell(int x, int y)
+        public Cell(int x = 0, int y = 0)
         {
             X = x;
             Y = y;

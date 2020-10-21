@@ -7,71 +7,75 @@
 <h1>A maze</h1>
 <form asp-controller="Maze" asp-action="AMaze">
     <p>
-        <div style="margin-bottom:15px;">
-            Width: <input asp-for="Width" style="margin-right:20px;" />
-            Height: <input asp-for="Height" />
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>Width:</label><br />
+            <input asp-for="Width" max="100" class="form-control" style="width:80px; margin-right:20px;" />
+            <label>Height:</label><br />
+            <input asp-for="Height" max="100" class="form-control" style="width:80px;" />
         </div>
-        <button type="submit">New maze</button>
+        <button type="submit" class="btn btn-success">New maze</button>
     </p>
 </form>
 
-<div style="font-family:'Lucida Console', monospace;">
-    @* Print intro text *@
-    <br />
-    Start Here!<br />
-    &nbsp;V
-    @* Render maze *@
-    @* Start with top line *@
-    @for (int i = 2; i <= Model.Width; i++)
-    {
-        <text>_&nbsp;</text>
-    }
-    <br />
-
-    @* Print bottom and right borders of each cell *@
-    @for (int row = 1; row <= Model.Height; row++)
-    {
-        for (int col = 1; col <= Model.Width; col++)
+<div class="row">
+    <div class="w-100 mx-auto" style="font-family:'Lucida Console', monospace;">
+        @* Print intro text *@
+        <br />
+        Start Here!<br />
+        &nbsp;V
+        @* Render maze *@
+        @* Start with top line *@
+        @for (int i = 2; i <= Model.Width; i++)
         {
-            // Print left side of maze
-            if (1 == col)
-            {
-                <text>|</text>
-            }
+            <text>_&nbsp;</text>
+        }
+        <br />
 
-            // Bottom
-            if (row == Model.Height || (!Model.GetAt(col, row + 1).IsConnectedTo(Model.GetAt(col, row))))
+        @* Print bottom and right borders of each cell *@
+        @for (int row = 1; row <= Model.Height; row++)
+        {
+            for (int col = 1; col <= Model.Width; col++)
             {
-                if (Model.GetAt(col, row) != Model.End)
+                // Print left side of maze
+                if (1 == col)
                 {
-                    <text>_</text>
+                    <text>|</text>
                 }
-                else // Print end cell with no bottom as an exit
+
+                // Bottom
+                if (row == Model.Height || (!Model.GetAt(col, row + 1).IsConnectedTo(Model.GetAt(col, row))))
+                {
+                    if (Model.GetAt(col, row) != Model.End)
+                    {
+                        <text>_</text>
+                    }
+                    else // Print end cell with no bottom as an exit
+                    {
+                        <text>&nbsp;</text>
+                    }
+                }
+                else
+                {
+                    <text>&nbsp;</text>
+                }
+
+                // Right
+                if (col == Model.Width || (!Model.GetAt(col + 1, row).IsConnectedTo(Model.GetAt(col, row))))
+                {
+                    <text>|</text>;
+                }
+                else
                 {
                     <text>&nbsp;</text>
                 }
             }
-            else
-            {
-                <text>&nbsp;</text>
-            }
-
-            // Right
-            if (col == Model.Width || (!Model.GetAt(col + 1, row).IsConnectedTo(Model.GetAt(col, row))))
-            {
-                <text>|</text>;
-            }
-            else
-            {
-                <text>&nbsp;</text>
-            }
+            <br />
         }
         <br />
-    }
-    <br />
 
-    @* TODO: Enable navigation of the maze! *@
+        @* TODO: Enable navigation of the maze! *@
 
+    </div>
 </div>
 @*<div>
     <a asp-controller="Maze" asp-action="AMaze">New Maze</a>
