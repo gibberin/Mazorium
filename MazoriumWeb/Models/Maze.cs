@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,8 +10,8 @@ namespace MazoriumWeb.Models
 {
     public class Maze
     {
-        int _height = 10;
-        int _width = 10;
+        protected int _height = 10;
+        protected int _width = 10;
 
         public int Height { get { return _height; } set { _height = value; GenerateMaze(); } }
         public int Width { get { return _width; } set { _width = value;  GenerateMaze(); } }
@@ -17,14 +19,18 @@ namespace MazoriumWeb.Models
         public Cell Start { get; set; }
         public Cell End { get; set; }
 
-        List<List<Cell>> matrix;
+        protected List<List<Cell>> _matrix;
+        public List<List<Cell>> Matrix { get { return _matrix; } }
 
-        public Maze(int x, int y)
+        public Maze(int x = 10, int y = 10)
         {
+            x = Math.Max(Math.Min(x, 100), 1);
+            y = Math.Max(Math.Min(y, 100), 1);
+
             _width = x;
             _height = y;
 
-            matrix = new List<List<Cell>>();
+            _matrix = new List<List<Cell>>();
 
             Start = new Cell(1, 1);
             End = new Cell(Width, Height);
@@ -52,7 +58,7 @@ namespace MazoriumWeb.Models
             _height = height;
             _width = width;
 
-            matrix.Clear();
+            _matrix.Clear();
 
             List<Cell> unconnectedCells = new List<Cell>();
 
@@ -85,7 +91,7 @@ namespace MazoriumWeb.Models
 
             for (int row = 1; row <= Height; row++)
             {
-                matrix.Add(new List<Cell>());
+                _matrix.Add(new List<Cell>());
 
                 for (int col = 1; col <= Width; col++)
                 {
@@ -100,7 +106,7 @@ namespace MazoriumWeb.Models
                         newCell.AddNeighbor(GetAt(col, row - 1));
                     }
 
-                    matrix[row - 1].Add(newCell);
+                    _matrix[row - 1].Add(newCell);
                     unconnectedCells.Add(newCell);
                 }
             }
@@ -122,11 +128,19 @@ namespace MazoriumWeb.Models
                 return 0;
             }
 
+            if(1 == Width * Height)
+            {
+                return 1;
+            }
+
             // Create paths
             int pathCount = 0;
             Random rand = new Random((int)DateTime.Now.Ticks);
             List<Cell> currPath = new List<Cell>();
             List<Cell> validNextCells = new List<Cell>();
+
+            // Fake a path at the start to ensure a valid maze is generated
+            unconnectedCells.Remove(Start);
 
             //  Select random unconnected cell
             while (0 < unconnectedCells.Count)
@@ -199,20 +213,121 @@ namespace MazoriumWeb.Models
         /// <returns></returns>
         public Cell GetAt(int col, int row)
         {
-            if(null == matrix || 0 == matrix.Count())
+            if(null == _matrix || 0 == _matrix.Count())
             {
                 Debug.WriteLine("Attempt to retrieve cells from non-existant matrix");
                 return null;
             }
 
             // Test requested cell exists
-            if((1 > row || row > matrix.Count()) || (1 > col || col > matrix[0].Count()))
+            if((1 > row || row > _matrix.Count()) || (1 > col || col > _matrix[0].Count()))
             {
-                Debug.WriteLine("Requested cell (" + col + ", " + row + ") is outside matrix boundaries " + matrix[0].Count() + "x" + matrix.Count());
+                Debug.WriteLine("Requested cell (" + col + ", " + row + ") is outside matrix boundaries " + _matrix[0].Count() + "x" + _matrix.Count());
                 return null;
             }
 
-            return matrix[row - 1][col - 1];
+            return _matrix[row - 1][col - 1];
+        }
+
+        /// <summary>
+        /// Recursive depth first search (DFS) for the path between two given cells
+        /// </summary>
+        /// <param name="first">The start cell</param>
+        /// <param name="last">The end cell</param>
+        /// <returns>A list of cells defining the path to the destination or null if there is no path</returns>
+        public List<Cell> GetOptimalPathDFS(List<Cell>visited, Cell first, Cell last)
+        {
+            List<Cell> path = new List<Cell>();
+            Queue<Cell> nextCells = new Queue<Cell>();
+
+            if(first == last)
+            {
+                path.Add(first);
+                return path;
+            }
+
+            if(1 == last.Connections.Count && last != End && last != Start)
+            {
+                return null;
+            }
+
+            visited.Add(last);
+
+            // Seek a path between each connected cell and the destination (start cell)
+            foreach(Cell next in last.Connections)
+            {
+                // Don't check the cell we are starting from
+                if(visited.Contains(next))
+                {
+                    continue;
+                }
+
+                path = GetOptimalPathDFS(visited, first, next);
+
+                if(null != path)
+                {
+                    path.Insert(0, last);
+                    return path;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Breadth first search (BFS) for the path between two given cells
+        /// </summary>
+        /// <param name="first">The start cell</param>
+        /// <param name="last">The end cell</param>
+        /// <returns>A list of cells defining the path to the destination or null if there is no path</returns>
+        public List<Cell> GetOptimalPathBFS(Cell first, Cell last)
+        {
+            List<Cell> path = new List<Cell>();
+            HashSet<Cell> visited = new HashSet<Cell>();
+
+            // Queue the start cell
+            Queue<Cell> nextCells = new Queue<Cell>();
+            first.pathParent = null;
+            nextCells.Enqueue(first);
+
+            // Check cells in the queue
+            Cell currCell;
+            while(0 < nextCells.Count)
+            {
+                // Get the next cell in the queue, mark it as visited
+                currCell = nextCells.Dequeue();
+                visited.Add(currCell);
+
+                // If this is the destination cell build the final path
+                if(currCell == last)
+                {
+                    // Walk backward from this cell and build the path
+                    path.Insert(0, currCell);
+                    while (null != currCell.pathParent)
+                    {
+                        path.Add(currCell.pathParent);
+                        currCell = currCell.pathParent;
+                    }
+
+                    return path;
+                }
+                else
+                {
+                    // Queue this cell's unvisited neighbors
+                    foreach (Cell cnx in currCell.Connections)
+                    {
+                        if (!visited.Contains(cnx))
+                        {
+                            cnx.pathParent = currCell;
+                            nextCells.Enqueue(cnx);
+                        }
+                    }
+                }
+            }
+
+            // No path was found
+            return null;
+            
         }
     }
 }

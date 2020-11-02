@@ -11,6 +11,7 @@ namespace MazoriumWeb.Models
         public int X { get; set; }
         public int Y { get; set; }
         public bool Visited = false;
+        public Cell pathParent;
 
         public List<Cell> Neighbors { get; }
         public List<Cell> Connections { get; }
