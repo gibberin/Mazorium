@@ -23,8 +23,10 @@ namespace MazoriumWeb.Controllers
             Maze maze = new Maze(width, height);
             MazeView mazeView = new MazeView(maze);
 
+            // Create the actual maze
             maze.GenerateMaze();
 
+            // Determine solution paths using DFS and BFS algorithms
             List<Cell> visited = new List<Cell>();
             mazeView.DFSPath = maze.GetOptimalPathDFS(visited, maze.Start, maze.End);
             if(null == mazeView.DFSPath)

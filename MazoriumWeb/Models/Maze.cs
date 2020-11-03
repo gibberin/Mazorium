@@ -39,7 +39,7 @@ namespace MazoriumWeb.Models
         /// <summary>
         /// Generate maze with existing parameters
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The total number of cells in the maze</returns>
         public int GenerateMaze()
         {
             return GenerateMaze(Start, End, Height, Width);
@@ -148,7 +148,7 @@ namespace MazoriumWeb.Models
                 pathCount++;
                 currPath.Add(cell);
 
-                // Extend path in a random direction until a connected cell is encountered
+                // Extend path in a random direction until a previously connected cell is encountered
                 bool extend = true;
                 while (extend)
                 {
@@ -158,17 +158,17 @@ namespace MazoriumWeb.Models
                     int numNextCells = validNextCells.Count;
                     if (0 == numNextCells)
                     {
-                        Console.WriteLine("Dead end encountered at (" + cell.X + ", " + cell.Y + ")");
+                        //Console.WriteLine("Dead end encountered at (" + cell.X + ", " + cell.Y + ")");
                         unconnectedCells.Remove(cell);
 
                         List<Cell> cellPool = new List<Cell>(currPath);
 
-                        // Resolve cyclical paths by picking a random cell in the current path and extending the path in a different direction
+                        // Resolve deadend paths by picking a random cell in the current path and extending the path in a different direction
                         while (0 == validNextCells.Count())
                         {
                             cell = cellPool[rand.Next(cellPool.Count())];
                             cellPool.Remove(cell);
-                            Console.WriteLine("Testing random cell on path (" + cell.X + ", " + cell.Y + ")");
+                            //Console.WriteLine("Testing random cell on path (" + cell.X + ", " + cell.Y + ")");
                             validNextCells = GetValidNextCells(ref currPath, cell);
                             if(0 == cellPool.Count())
                             {
@@ -177,14 +177,14 @@ namespace MazoriumWeb.Models
                             }
                         }
 
-                        Console.WriteLine("Selected (" + cell.X + ", " + cell.Y + ")");
+                        //Console.WriteLine("Selected (" + cell.X + ", " + cell.Y + ")");
                         numNextCells = validNextCells.Count();
                     }
 
                     Cell nextCell = validNextCells[rand.Next(numNextCells)];
-                    Console.Write("Adding (" + nextCell.X + ", " + nextCell.Y + ")");
+                    //Console.Write("Adding (" + nextCell.X + ", " + nextCell.Y + ")");
                     extend = nextCell.IsUnconnected();
-                    Console.WriteLine(extend ? " - extending" : " ");
+                    //Console.WriteLine(extend ? " - extending" : " ");
                     cell.ConnectTo(nextCell);
                     unconnectedCells.Remove(cell);
                     cell = nextCell;
@@ -195,7 +195,7 @@ namespace MazoriumWeb.Models
                 if (0 < unconnectedCells.Count)
                 {
                     cell = unconnectedCells[rand.Next(unconnectedCells.Count)];
-                    Console.WriteLine("New start at (" + cell.X + ", " + cell.Y + ")");
+                    //Console.WriteLine("New start at (" + cell.X + ", " + cell.Y + ")");
                 }
             }
 
