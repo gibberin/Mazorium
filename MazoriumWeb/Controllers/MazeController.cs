@@ -21,30 +21,32 @@ namespace MazoriumWeb.Controllers
         public ActionResult AMaze(int width = 10, int height = 10)
         {
             Maze maze = new Maze(width, height);
+            MazeView mazeView = new MazeView(maze);
+
             maze.GenerateMaze();
 
             List<Cell> visited = new List<Cell>();
-            List<Cell> DFSPath = maze.GetOptimalPathDFS(visited, maze.Start, maze.End);
-            if(null == DFSPath)
+            mazeView.DFSPath = maze.GetOptimalPathDFS(visited, maze.Start, maze.End);
+            if(null == mazeView.DFSPath)
             {
                 Console.WriteLine("No valid DFS path identified.");
             }
             else
             {
-                Console.WriteLine("Valid DFS path identified with " + DFSPath.Count + " steps");
+                Console.WriteLine("Valid DFS path identified with " + mazeView.DFSPath.Count + " steps");
             }
 
-            List<Cell> BFSPath = maze.GetOptimalPathBFS(maze.Start, maze.End);
-            if (null == BFSPath)
+            mazeView.BFSPath = maze.GetOptimalPathBFS(maze.Start, maze.End);
+            if (null == mazeView.BFSPath)
             {
                 Console.WriteLine("No valid BFS path identified.");
             }
             else
             {
-                Console.WriteLine("Valid BFS path identified with " + BFSPath.Count + " steps");
+                Console.WriteLine("Valid BFS path identified with " + mazeView.BFSPath.Count + " steps");
             }
 
-            return View(maze);
+            return View(mazeView);
         }
 
         // GET: MazeController/Details/5

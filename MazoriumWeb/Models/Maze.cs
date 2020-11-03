@@ -139,16 +139,14 @@ namespace MazoriumWeb.Models
             List<Cell> currPath = new List<Cell>();
             List<Cell> validNextCells = new List<Cell>();
 
-            // Fake a path at the start to ensure a valid maze is generated
-            unconnectedCells.Remove(Start);
+            Cell cell = End;
 
             //  Select random unconnected cell
             while (0 < unconnectedCells.Count)
             {
                 currPath.Clear();
                 pathCount++;
-
-                Cell cell = unconnectedCells[rand.Next(unconnectedCells.Count)];
+                currPath.Add(cell);
 
                 // Extend path in a random direction until a connected cell is encountered
                 bool extend = true;
@@ -160,24 +158,44 @@ namespace MazoriumWeb.Models
                     int numNextCells = validNextCells.Count;
                     if (0 == numNextCells)
                     {
+                        Console.WriteLine("Dead end encountered at (" + cell.X + ", " + cell.Y + ")");
                         unconnectedCells.Remove(cell);
+
+                        List<Cell> cellPool = new List<Cell>(currPath);
 
                         // Resolve cyclical paths by picking a random cell in the current path and extending the path in a different direction
                         while (0 == validNextCells.Count())
                         {
-                            cell = currPath[rand.Next(currPath.Count())];
+                            cell = cellPool[rand.Next(cellPool.Count())];
+                            cellPool.Remove(cell);
+                            Console.WriteLine("Testing random cell on path (" + cell.X + ", " + cell.Y + ")");
                             validNextCells = GetValidNextCells(ref currPath, cell);
+                            if(0 == cellPool.Count())
+                            {
+                                Debug.Assert(0 == unconnectedCells.Count()); // We should only get here if there are no unconnected cells left to use to break out of the dead end
+                                return pathCount;
+                            }
                         }
 
+                        Console.WriteLine("Selected (" + cell.X + ", " + cell.Y + ")");
                         numNextCells = validNextCells.Count();
                     }
 
                     Cell nextCell = validNextCells[rand.Next(numNextCells)];
+                    Console.Write("Adding (" + nextCell.X + ", " + nextCell.Y + ")");
                     extend = nextCell.IsUnconnected();
+                    Console.WriteLine(extend ? " - extending" : " ");
                     cell.ConnectTo(nextCell);
                     unconnectedCells.Remove(cell);
                     cell = nextCell;
                     currPath.Add(cell);
+                }
+
+                // Pick the next starting cell at random
+                if (0 < unconnectedCells.Count)
+                {
+                    cell = unconnectedCells[rand.Next(unconnectedCells.Count)];
+                    Console.WriteLine("New start at (" + cell.X + ", " + cell.Y + ")");
                 }
             }
 
@@ -271,6 +289,7 @@ namespace MazoriumWeb.Models
                 }
             }
 
+            // No path was found
             return null;
         }
 

@@ -1,7 +1,7 @@
-﻿@model MazoriumWeb.Models.Maze
+﻿@model MazoriumWeb.Models.MazeView
 
 @{
-    ViewData["Title"] = "Maze";
+    ViewData["Title"] = "Your Maze";
 }
 
 <h1>A maze</h1>
@@ -9,9 +9,9 @@
     <p>
         <div class="form-group" style="margin-bottom:15px;">
             <label>Width:</label><br />
-            <input asp-for="Width" max="100" class="form-control" style="width:80px; margin-right:20px;" />
+            <input asp-for="AMaze.Width" name="width" max="40" class="form-control" style="width:80px; margin-right:20px;" />
             <label>Height:</label><br />
-            <input asp-for="Height" max="100" class="form-control" style="width:80px;" />
+            <input asp-for="AMaze.Height" name="height" max="40" class="form-control" style="width:80px;" />
         </div>
         <button type="submit" class="btn btn-success">New maze</button>
     </p>
@@ -25,16 +25,16 @@
         &nbsp;V
         @* Render maze *@
         @* Start with top line *@
-        @for (int i = 2; i <= Model.Width; i++)
+        @for (int i = 2; i <= Model.AMaze.Width; i++)
         {
             <text>_&nbsp;</text>
         }
         <br />
 
         @* Print bottom and right borders of each cell *@
-        @for (int row = 1; row <= Model.Height; row++)
+        @for (int row = 1; row <= Model.AMaze.Height; row++)
         {
-            for (int col = 1; col <= Model.Width; col++)
+            for (int col = 1; col <= Model.AMaze.Width; col++)
             {
                 // Print left side of maze
                 if (1 == col)
@@ -43,9 +43,9 @@
                 }
 
                 // Bottom
-                if (row == Model.Height || (!Model.GetAt(col, row + 1).IsConnectedTo(Model.GetAt(col, row))))
+                if (row == Model.AMaze.Height || (!Model.AMaze.GetAt(col, row + 1).IsConnectedTo(Model.AMaze.GetAt(col, row))))
                 {
-                    if (Model.GetAt(col, row) != Model.End)
+                    if (Model.AMaze.GetAt(col, row) != Model.AMaze.End)
                     {
                         <text>_</text>
                     }
@@ -60,7 +60,7 @@
                 }
 
                 // Right
-                if (col == Model.Width || (!Model.GetAt(col + 1, row).IsConnectedTo(Model.GetAt(col, row))))
+                if (col == Model.AMaze.Width || (!Model.AMaze.GetAt(col + 1, row).IsConnectedTo(Model.AMaze.GetAt(col, row))))
                 {
                     <text>|</text>;
                 }
@@ -77,6 +77,29 @@
 
     </div>
 </div>
+
+<div>
+    <p>
+        @if (null != Model.DFSPath)
+        {
+            <text>Depth first search (DFS) solution in @Model.DFSPath.Count() steps</text><br />
+        }
+        else
+        {
+            <text>No depth first search solution identified</text>< br />
+        }
+
+        @if (null != Model.DFSPath)
+        {
+            <text>Breadth first search (BFS) solution in @Model.BFSPath.Count() steps</text>
+        }
+        else
+        {
+            <text>No breadth first search solution identified</text>
+        }
+    </p>
+    </div>
+
 @*<div>
-    <a asp-controller="Maze" asp-action="AMaze">New Maze</a>
-</div>*@
+        <a asp-controller="Maze" asp-action="AMaze">New Maze</a>
+    </div>*@
