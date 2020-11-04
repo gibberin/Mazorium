@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,10 +20,12 @@ namespace MazoriumWeb.Models
         public Cell Start { get; set; }
         public Cell End { get; set; }
 
+        public int Seed { get; set; }
+
         protected List<List<Cell>> _matrix;
         public List<List<Cell>> Matrix { get { return _matrix; } }
 
-        public Maze(int x = 10, int y = 10)
+        public Maze(int x = 10, int y = 10, int seed = 0)
         {
             x = Math.Max(Math.Min(x, 100), 1);
             y = Math.Max(Math.Min(y, 100), 1);
@@ -34,6 +37,8 @@ namespace MazoriumWeb.Models
 
             Start = new Cell(1, 1);
             End = new Cell(Width, Height);
+
+            Seed = seed;
         }
 
         /// <summary>
@@ -53,7 +58,7 @@ namespace MazoriumWeb.Models
         /// <param name="height">The number of rows in the maze</param>
         /// <param name="width">The number of columns in the maze</param>
         /// <returns>The total number of cells in the maze</returns>
-        public int GenerateMaze(Cell start, Cell end, int height = 10, int width = 10)
+        public int GenerateMaze(Cell start, Cell end, int height = 10, int width = 10, int seed = 0)
         {
             _height = height;
             _width = width;
@@ -135,7 +140,8 @@ namespace MazoriumWeb.Models
 
             // Create paths
             int pathCount = 0;
-            Random rand = new Random((int)DateTime.Now.Ticks);
+            Seed = (0 == Seed) ? (int)DateTime.Now.Ticks : Seed;
+            Random rand = new Random(Seed);
             List<Cell> currPath = new List<Cell>();
             List<Cell> validNextCells = new List<Cell>();
 

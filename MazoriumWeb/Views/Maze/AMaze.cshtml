@@ -7,14 +7,22 @@
 <h1>A maze</h1>
 <form asp-controller="Maze" asp-action="AMaze">
     <p>
-        <div class="form-group" style="margin-bottom:15px;">
-            <label>Width:</label><br />
-            <input asp-for="AMaze.Width" name="width" max="40" class="form-control" style="width:80px; margin-right:20px;" />
-            <label>Height:</label><br />
-            <input asp-for="AMaze.Height" name="height" max="40" class="form-control" style="width:80px;" />
-        </div>
-        <button type="submit" class="btn btn-success">New maze</button>
-    </p>
+        <div class="form-group; row" style="margin-bottom:15px;">
+            <div class="col-md-2">
+                <label style="font-weight : bold;">Width:</label>
+                <input asp-for="AMaze.Width" name="width" max="40" class="form-control" style="width:80px; margin-right:20px;" />
+            </div>
+            <div class="col-md-2">
+                <label style="font-weight : bold;">Height:</label>
+                <input asp-for="AMaze.Height" name="height" max="40" class="form-control" style="width:80px;" />
+            </div>
+            <div class="col-md-4">
+                <label style="font-weight : bold;">Random Seed: (enter 0 for a random maze)</label>
+                <input asp-for="AMaze.Seed" name="seed" value="0" class="form-control" style="width:180px;" />
+            </div>
+         </div>
+         <button type="submit" class="btn btn-success">New maze</button>
+</p>
 </form>
 
 <div class="row">
@@ -80,6 +88,7 @@
 
 <div>
     <p>
+        <label>Seed:&nbsp;@Model.Seed</label><br />
         @if (null != Model.DFSPath)
         {
             <text>Depth first search (DFS) solution in @Model.DFSPath.Count() steps</text><br />

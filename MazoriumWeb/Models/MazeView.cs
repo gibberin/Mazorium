@@ -10,6 +10,7 @@ namespace MazoriumWeb.Models
         public Maze AMaze { get; set; }
         public List<Cell> DFSPath { get; set; }
         public List<Cell> BFSPath { get; set; }
+        public int Seed { get { return AMaze.Seed; } }
 
         public MazeView(Maze maze)
         {
