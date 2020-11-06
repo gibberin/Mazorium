@@ -22,6 +22,8 @@ namespace MazoriumWeb
             Maze newMaze = new Maze();
             newMaze.GenerateMaze();
 
+            // Hello GitHub Desktop!
+
             // TODO: Build iterator for cells in maze grid
 
             StringBuilder json = new StringBuilder();
