@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MazoriumWeb.Models
@@ -114,6 +115,20 @@ namespace MazoriumWeb.Models
             }
 
             return unconnectedNeighbors;
+        }
+
+        public string Json()
+        {
+            StringBuilder json = new StringBuilder();
+
+            json.AppendLine("{");
+
+            // Enumerate cells in the grid and generate representative json
+
+
+            json.AppendLine("}");
+
+            return json.ToString();
         }
     }
 }
