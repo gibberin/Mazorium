@@ -87,24 +87,24 @@ namespace MazoriumTests
         }
 
         [Theory]
-        [InlineData(1, 1)]
-        [InlineData(100, 100)]
-        [InlineData(99, 99)]
-        [InlineData(1, 100)]
-        [InlineData(100, 1)]
-        [InlineData(0, 1)]
-        [InlineData(1, 0)]
-        [InlineData(-1, 1)]
-        [InlineData(1, -1)]
-        [InlineData(int.MaxValue, 1)]
-        [InlineData(int.MinValue, 1)]
-        [InlineData(1, int.MaxValue)]
-        [InlineData(1, int.MinValue)]
-        public void MazeOfGivenSizeIsGenerated(int width, int height)
+        [InlineData(1, 1, 1, 1)]
+        [InlineData(100, 100, 100, 100)]
+        [InlineData(99, 99, 99, 99)]
+        [InlineData(1, 100, 1, 100)]
+        [InlineData(100, 1, 100, 1)]
+        [InlineData(0, 1, 1, 1)]
+        [InlineData(1, 0, 1, 1)]
+        [InlineData(-1, 1, 1, 1)]
+        [InlineData(1, -1, 1, 1)]
+        [InlineData(int.MaxValue, 1, 100, 1)]
+        [InlineData(int.MinValue, 1, 1, 1)]
+        [InlineData(1, int.MaxValue, 1, 100)]
+        [InlineData(1, int.MinValue, 1, 1)]
+        public void MazeOfGivenSizeIsGenerated(int width, int height, int expectedWidth, int expectedHeight)
         {
             Maze testMaze = new Maze(width, height);
             testMaze.GenerateMaze();
-            Assert.True(height == testMaze.Matrix.Count && width == testMaze.Matrix[height - 1].Count);
+            Assert.True(expectedHeight == testMaze.Matrix.Count && expectedWidth == testMaze.Matrix[testMaze.Height - 1].Count);
         }
     }
 }
