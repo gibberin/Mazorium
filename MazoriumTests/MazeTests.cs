@@ -86,9 +86,43 @@ namespace MazoriumTests
             Assert.True(0 < testMaze.Matrix.Count && 0 < testMaze.Matrix[0].Count);
         }
 
+        [Fact]
+        public void ValidMazeIsGenerated()
+        {
+            Maze testMaze = new Maze(100, 100);
+
+            for (int i = 1; i <= 10; i++)
+            {
+                testMaze.GenerateMaze();
+                Assert.NotNull(testMaze.GetOptimalPathBFS(testMaze.Start, testMaze.End));
+            }
+        }
+
+        [Fact]
+        public void ValidJsonIsGenerated()
+        {
+            Maze testMaze = new Maze();
+            testMaze.GenerateMaze();
+            string json = testMaze.ToJson();
+            Assert.True(0 < json.Length);
+        }
+
+        [Theory]
+        [InlineData(1, 1)]
+        [InlineData(10, 10)]
+        [InlineData(5, 5)]
+        public void CellIsRetrievedByLocation(int x, int y)
+        {
+            Maze testMaze = new Maze();
+            testMaze.GenerateMaze();
+            Assert.NotNull(testMaze.GetAt(x, y));
+        }
+
         [Theory]
         [InlineData(1, 1, 1, 1)]
         [InlineData(100, 100, 100, 100)]
+        [InlineData(101, 100, 100, 100)]
+        [InlineData(100, 101, 100, 100)]
         [InlineData(99, 99, 99, 99)]
         [InlineData(1, 100, 1, 100)]
         [InlineData(100, 1, 100, 1)]

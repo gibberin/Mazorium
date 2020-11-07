@@ -19,6 +19,9 @@ namespace MazoriumWeb.Models
 
         public Cell(int x = 0, int y = 0)
         {
+            x = Math.Max(Math.Min(x, 100), 1);
+            y = Math.Max(Math.Min(y, 100), 1);
+
             X = x;
             Y = y;
 
