@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MazoriumWeb.Models
 {
-    public class Maze
+    public class Maze : IEnumerable<Cell>
     {
         protected int _height = 10;
         protected int _width = 10;
@@ -254,6 +255,30 @@ namespace MazoriumWeb.Models
         }
 
         /// <summary>
+        /// Provide cell enumerator for the maze grid
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<Cell> GetEnumerator()
+        {
+            foreach(List<Cell> row in _matrix)
+            {
+                foreach(Cell cell in row)
+                {
+                    yield return cell;
+                }
+            }
+        }
+
+        // The IEnumerable.GetEnumerator method is also required
+        // because IEnumerable<T> derives from IEnumerable.
+        System.Collections.IEnumerator
+          System.Collections.IEnumerable.GetEnumerator()
+        {
+            // Invoke IEnumerator<string> GetEnumerator() above.
+            return GetEnumerator();
+        }
+
+        /// <summary>
         /// Recursive depth first search (DFS) for the path between two given cells
         /// </summary>
         /// <param name="first">The start cell</param>
@@ -352,7 +377,47 @@ namespace MazoriumWeb.Models
 
             // No path was found
             return null;
-            
+        }
+
+        /// <summary>
+        /// Returns a JSON representation of the maze info
+        /// </summary>
+        /// <returns>A JSON string</returns>
+        public string ToJson()
+        {
+            StringBuilder json = new StringBuilder();
+            json.AppendLine("{");
+            json.AppendLine($"  \"width\" : \"{Width}\",");
+            json.AppendLine($"  \"height\" : \"{Height}\",");
+            json.AppendLine("");
+            json.AppendLine("  \"start\" : [");
+            json.AppendLine("      {");
+            json.AppendLine($"        \"X\" : \"{Start.X}\",");
+            json.AppendLine($"        \"Y\" : \"{Start.Y}\",");
+            json.AppendLine("      {");
+            json.AppendLine("    ],");
+            json.AppendLine("  \"end\" : [");
+            json.AppendLine("      {");
+            json.AppendLine($"        \"X\" : \"{End.X}\",");
+            json.AppendLine($"        \"Y\" : \"{End.Y}\",");
+            json.AppendLine("      {");
+            json.AppendLine("    ],");
+            json.AppendLine("");
+            json.AppendLine($"  \"seed\" : \"{Seed}\",");
+            json.AppendLine("");
+
+            json.AppendLine("  \"cell\" : [");
+            // Convert each cell's info to json
+            foreach (Cell cell in this)
+            {
+                json.AppendLine("");
+                json.Append(cell.ToJson());
+            }
+
+            json.AppendLine("  ]");
+            json.Append("}");
+
+            return json.ToString();
         }
     }
 }

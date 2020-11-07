@@ -117,16 +117,44 @@ namespace MazoriumWeb.Models
             return unconnectedNeighbors;
         }
 
-        public string Json()
+        /// <summary>
+        /// Return a JSON representation of this cell
+        /// </summary>
+        /// <returns>A JSON string</returns>
+        public string ToJson()
         {
             StringBuilder json = new StringBuilder();
 
-            json.AppendLine("{");
+            json.AppendLine("    {");
+            json.AppendLine($"      \"X\" : \"{X}\",");
+            json.AppendLine($"      \"Y\" : \"{Y}\",");
+            json.AppendLine("");
 
-            // Enumerate cells in the grid and generate representative json
+            // Enumerate neighbors
+            json.AppendLine("      \"neighbors\" : [");
+            foreach (Cell neighbor in Neighbors)
+            {
+                json.AppendLine("        {");
+                json.AppendLine($"          \"X\" : \"{neighbor.X}\",");
+                json.AppendLine($"          \"Y\" : \"{neighbor.Y}\",");
+                json.AppendLine("        },");
+            }
+            json.AppendLine("      ],");
+            json.AppendLine("");
 
+            json.AppendLine("      \"connections\" : [");
+            // Enumerate Connections
+            foreach (Cell cnx in Connections)
+            {
+                json.AppendLine("        {");
+                json.AppendLine($"          \"X\" : \"{cnx.X}\",");
+                json.AppendLine($"          \"Y\" : \"{cnx.Y}\",");
+                json.AppendLine("        },");
 
-            json.AppendLine("}");
+            }
+            json.AppendLine("      ],");
+
+            json.AppendLine("    },");
 
             return json.ToString();
         }

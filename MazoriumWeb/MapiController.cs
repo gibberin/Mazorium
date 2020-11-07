@@ -22,23 +22,8 @@ namespace MazoriumWeb
             Maze newMaze = new Maze();
             newMaze.GenerateMaze();
 
-            // Hello GitHub Desktop!
 
-            // TODO: Build iterator for cells in maze grid
-
-            StringBuilder json = new StringBuilder();
-            json.AppendLine("{");
-            json.AppendLine($"  'Width' : '{newMaze.Width}',");
-            json.AppendLine($"  'Height' : '{newMaze.Height}',");
-            json.AppendLine($"  'Start' : '{newMaze.Start.X}, {newMaze.Start.Y}',");
-            json.AppendLine($"  'End' : '{newMaze.End.X}, {newMaze.End.Y}',");
-            json.AppendLine($"  'Seed' : '{newMaze.Seed}',");
-
-            // TODO: Convert each cell's info to json
-
-            json.Append("}");
-
-            return json.ToString();
+            return newMaze.ToJson();
         }
 
         // GET api/<MapiController>/5
